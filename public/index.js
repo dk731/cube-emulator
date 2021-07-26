@@ -1,3 +1,6 @@
+import * as THREE from "https://unpkg.com/three@0.130.0/build/three.module.js";
+import { OrbitControls } from "https://unpkg.com/three@0.130.0/examples/jsm/controls/OrbitControls.js";
+
 var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera(
   75,
