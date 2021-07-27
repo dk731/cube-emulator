@@ -1,9 +1,9 @@
-import * as THREE from "https://unpkg.com/three@0.127.0/build/three.module.js";
-import { OrbitControls } from "https://unpkg.com/three@0.127.0/examples/jsm/controls/OrbitControls.js";
-import { EffectComposer } from "https://unpkg.com/three@0.127.0/examples/jsm/postprocessing/EffectComposer.js";
-import { RenderPass } from "https://unpkg.com/three@0.127.0/examples/jsm/postprocessing/RenderPass.js";
-import { ShaderPass } from "https://unpkg.com/three@0.127.0/examples/jsm/postprocessing/ShaderPass.js";
-import { UnrealBloomPass } from "https://unpkg.com/three@0.127.0/examples/jsm/postprocessing/UnrealBloomPass.js";
+import * as THREE from "https://cdn.skypack.dev/pin/three@v0.130.1-bsY6rEPcA1ZYyZeKdbHd/mode=imports/optimized/three.js";
+import { OrbitControls } from "https://cdn.skypack.dev/three@v0.130.1-bsY6rEPcA1ZYyZeKdbHd/examples/jsm/controls/OrbitControls.js";
+import { EffectComposer } from "https://cdn.skypack.dev/three@v0.130.1-bsY6rEPcA1ZYyZeKdbHd/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "https://cdn.skypack.dev/three@v0.130.1-bsY6rEPcA1ZYyZeKdbHd/examples/jsm/postprocessing/RenderPass.js";
+import { ShaderPass } from "https://cdn.skypack.dev/three@v0.130.1-bsY6rEPcA1ZYyZeKdbHd/examples/jsm/postprocessing/ShaderPass.js";
+import { UnrealBloomPass } from "https://cdn.skypack.dev/three@v0.130.1-bsY6rEPcA1ZYyZeKdbHd/examples/jsm/postprocessing/UnrealBloomPass.js";
 
 var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera(
@@ -45,7 +45,7 @@ var grid_size = new THREE.Vector3(16, 16, 16);
 
 const ENTIRE_SCENE = 0,
   BLOOM_SCENE = 1;
-const sphere_geometry = new THREE.SphereGeometry(sphere_r, 16, 16);
+const sphere_geometry = new THREE.SphereGeometry(sphere_r, 10, 10);
 const table_geometry = new THREE.BoxGeometry(
   grid_size.x * grid_dist * 1.1,
   grid_dist / 2,
@@ -107,12 +107,15 @@ finalComposer.addPass(finalPass);
 
 var connect_delay = 500;
 
-var wait_routine_id = setInterval(wait_prog_routine, connect_delay);
+var wait_routine_id = setTimeout(wait_prog_routine, 0);
 var socket;
+var triggered_timeout = true;
 function wait_prog_routine() {
   try {
     socket = new WebSocket("ws://localhost:8080");
+    // setTimeout(on_connect_timeout, connect_delay);
     socket.onopen = init_socket;
+    socket.binaryType = "arraybuffer";
     socket.onmessage = on_prog_receive;
     socket.onclose = on_prog_close;
   } catch (err) {
@@ -120,18 +123,23 @@ function wait_prog_routine() {
   }
 }
 
+function on_connect_timeout() {
+  if (socket.readyState != WebSocket.OPEN) {
+    socket.close();
+  }
+}
+
 function init_socket(event) {
-  clearInterval(wait_routine_id);
-  console.log("Oppened socket!: ", socket.readyState);
+  console.log("SOCKET OPPENED!!!!!!!!!!!!!");
 }
 
 function on_prog_receive(event) {
-  console.log(event);
+  console.log(event.data);
 }
 
 function on_prog_close(event) {
-  console.log(event);
-  wait_routine_id = setInterval(wait_prog_routine, connect_delay);
+  console.log("closed, connecting");
+  setTimeout(wait_prog_routine, 0);
 }
 
 //////////////////
