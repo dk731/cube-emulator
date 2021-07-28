@@ -15,10 +15,10 @@
 
 CC      ?= gcc
 WSDIR    = $(CURDIR)/../
-INCLUDE  = -I $(WSDIR)/include
+INCLUDE  = -I /usr/local/include/wsserver
 CFLAGS   =  -Wall -Wextra -O2
 CFLAGS  +=  $(INCLUDE) -std=c99 -pthread -pedantic
-LIB      =  $(WSDIR)/libws.a
+LIB      =  /usr/local/lib64/libws.a
 
 # Check if verbose examples
 ifeq ($(VERBOSE_EXAMPLES), no)
@@ -31,8 +31,8 @@ endif
 all: send_receive
 
 # Send receive
-send_receive: send_receive.c $(LIB)
-	$(CC) $(CFLAGS) $(LDFLAGS) send_receive.c -o send_receive $(LIB)
+send_receive: send_receive.cpp $(LIB)
+	g++ $(CFLAGS) $(LDFLAGS) send_receive.cpp -o send_receive $(LIB)
 
 # Clean
 clean:

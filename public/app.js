@@ -42,6 +42,7 @@ window.addEventListener("resize", windowResize);
 var sphere_r = 0.2;
 var grid_dist = 2.5;
 var grid_size = new THREE.Vector3(16, 16, 16);
+var cur_array; // Place where last received ArrayBuffer from socket will be stored
 
 const ENTIRE_SCENE = 0,
   BLOOM_SCENE = 1;
@@ -134,7 +135,7 @@ function init_socket(event) {
 }
 
 function on_prog_receive(event) {
-  console.log(event.data);
+  cur_array = event.data;
 }
 
 function on_prog_close(event) {
@@ -216,12 +217,22 @@ function render() {
 }
 
 function update_colors() {
-  let i = 0;
+  if (cur_array && cur_array.byteLength == 12288)
+    var arr_view = new Uint8Array(cur_array);
+
   for (let z = 0; z < grid_size.z; z++)
     for (let y = 0; y < grid_size.y; y++)
       for (let x = 0; x < grid_size.x; x++) {
-        const cur_obj = scene.children[x + (y + z * grid_size.y) * grid_size.x];
-        const cur_color = colors_array[x][y][z];
+        const ind = x + (y + z * grid_size.y) * grid_size.x;
+        const cur_obj = scene.children[ind];
+
+        if (cur_array && cur_array.byteLength == 12288)
+          var cur_color = new THREE.Color(
+            arr_view[ind * 3] / 255,
+            arr_view[ind * 3 + 1] / 255,
+            arr_view[ind * 3 + 2] / 255
+          );
+        else var cur_color = new THREE.Color(0x000000);
 
         cur_obj.material.color.copy(cur_color);
       }
