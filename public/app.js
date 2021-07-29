@@ -104,12 +104,34 @@ const finalComposer = new EffectComposer(renderer);
 finalComposer.addPass(renderScene);
 finalComposer.addPass(finalPass);
 
+// Setup colors array of grid size
+var colors_array = Array.from({ length: grid_size.x }, () =>
+  Array.from({ length: grid_size.y }, () =>
+    Array.from({ length: grid_size.z }, () => new THREE.Color(0x050505))
+  )
+);
+
 ////////////////// socket
 
-var connect_delay = 500;
+var idle_anim = {
+  id: undefined,
+  delay: 300,
+  progress: 0,
+};
+
+idle_anim.id = setInterval(idle_animation, idle_anim.delay);
+
+function idle_animation() {
+  colors_array[Math.floor(Math.random() * grid_size.x)][
+    Math.floor(Math.random() * grid_size.y)
+  ][Math.floor(Math.random() * grid_size.z)] = new THREE.Color(
+    0xffffff * Math.random()
+  );
+}
 
 var wait_routine_id = setTimeout(wait_prog_routine, 0);
 var socket;
+var was_connected = false;
 var triggered_timeout = true;
 function wait_prog_routine() {
   try {
@@ -124,14 +146,10 @@ function wait_prog_routine() {
   }
 }
 
-function on_connect_timeout() {
-  if (socket.readyState != WebSocket.OPEN) {
-    socket.close();
-  }
-}
-
 function init_socket(event) {
   console.log("SOCKET OPPENED!!!!!!!!!!!!!");
+  clearInterval(idle_anim.id);
+  was_connected = true;
 }
 
 function on_prog_receive(event) {
@@ -141,17 +159,17 @@ function on_prog_receive(event) {
 function on_prog_close(event) {
   console.log("closed, connecting");
   setTimeout(wait_prog_routine, 0);
+  if (was_connected)
+    colors_array = Array.from({ length: grid_size.x }, () =>
+      Array.from({ length: grid_size.y }, () =>
+        Array.from({ length: grid_size.z }, () => new THREE.Color(0x050505))
+      )
+    );
+  was_connected = false;
+  idle_anim.id = setInterval(idle_animation, idle_anim.delay);
 }
 
 //////////////////
-// Setup colors array of grid size
-var colors_array = Array.from({ length: grid_size.x }, () =>
-  Array.from({ length: grid_size.y }, () =>
-    Array.from({ length: grid_size.z }, () => new THREE.Color(0x010101))
-  )
-);
-
-const dummy = new THREE.Object3D();
 
 setup_grid_mesh();
 animate();
@@ -162,11 +180,6 @@ function animate() {
   requestAnimationFrame(animate);
   controls.update();
 
-  colors_array[Math.floor(Math.random() * grid_size.x)][
-    Math.floor(Math.random() * grid_size.y)
-  ][Math.floor(Math.random() * grid_size.z)] = new THREE.Color(
-    0xffffff * Math.random()
-  );
   update_colors();
 
   render();
@@ -228,14 +241,16 @@ function update_colors() {
 
         if (cur_array && cur_array.byteLength == 12288)
           var cur_color = new THREE.Color(
-            arr_view[ind * 3] / 255,
             arr_view[ind * 3 + 1] / 255,
+            arr_view[ind * 3] / 255,
             arr_view[ind * 3 + 2] / 255
           );
-        else var cur_color = new THREE.Color(0x000000);
+        else var cur_color = colors_array[x][y][z];
 
         cur_obj.material.color.copy(cur_color);
       }
+
+  cur_array = undefined;
 }
 
 function darkenNonBloomed(obj) {
