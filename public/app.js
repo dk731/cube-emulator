@@ -39,7 +39,7 @@ function windowResize() {
 window.addEventListener("resize", windowResize);
 
 /////////////////
-var sphere_r = 0.2;
+var sphere_r = 0.15;
 var grid_dist = 2.5;
 var grid_size = new THREE.Vector3(16, 16, 16);
 var cur_array; // Place where last received ArrayBuffer from socket will be stored
@@ -63,7 +63,7 @@ const bloom_params = {
   exposure: 1,
   bloomStrength: 2.4,
   bloomThreshold: 0,
-  bloomRadius: 0.1,
+  bloomRadius: 0,
 };
 
 const DARK_MATERIAL = new THREE.MeshBasicMaterial({ color: "black" });
@@ -104,29 +104,47 @@ const finalComposer = new EffectComposer(renderer);
 finalComposer.addPass(renderScene);
 finalComposer.addPass(finalPass);
 
-// Setup colors array of grid size
-var colors_array = Array.from({ length: grid_size.x }, () =>
-  Array.from({ length: grid_size.y }, () =>
-    Array.from({ length: grid_size.z }, () => new THREE.Color(0x050505))
-  )
-);
-
 ////////////////// socket
 
 var idle_anim = {
   id: undefined,
   delay: 300,
   progress: 0,
+  points_list: [],
+  max_point: 512,
+  default_color: 0x050505,
 };
+
+// Setup colors array of grid size
+var colors_array = Array.from({ length: grid_size.x }, () =>
+  Array.from({ length: grid_size.y }, () =>
+    Array.from(
+      { length: grid_size.z },
+      () => new THREE.Color(idle_anim.default_color)
+    )
+  )
+);
 
 idle_anim.id = setInterval(idle_animation, idle_anim.delay);
 
 function idle_animation() {
-  colors_array[Math.floor(Math.random() * grid_size.x)][
-    Math.floor(Math.random() * grid_size.y)
-  ][Math.floor(Math.random() * grid_size.z)] = new THREE.Color(
+  const tmp_point = [
+    Math.floor(Math.random() * grid_size.x),
+    Math.floor(Math.random() * grid_size.y),
+    Math.floor(Math.random() * grid_size.z),
+  ];
+
+  idle_anim.points_list.push(tmp_point);
+  colors_array[tmp_point[0]][tmp_point[1]][tmp_point[2]] = new THREE.Color(
     0xffffff * Math.random()
   );
+
+  if (idle_anim.points_list.length > idle_anim.max_point) {
+    const tmp = idle_anim.points_list.shift();
+    colors_array[tmp[0]][tmp[1]][tmp[2]] = new THREE.Color(
+      idle_anim.default_color
+    );
+  }
 }
 
 var wait_routine_id = setTimeout(wait_prog_routine, 0);
@@ -142,12 +160,12 @@ function wait_prog_routine() {
     socket.onmessage = on_prog_receive;
     socket.onclose = on_prog_close;
   } catch (err) {
-    console.log(err);
+    // console.log(err);
   }
 }
 
 function init_socket(event) {
-  console.log("SOCKET OPPENED!!!!!!!!!!!!!");
+  // console.log("SOCKET OPPENED!!!!!!!!!!!!!");
   clearInterval(idle_anim.id);
   was_connected = true;
 }
@@ -157,14 +175,19 @@ function on_prog_receive(event) {
 }
 
 function on_prog_close(event) {
-  console.log("closed, connecting");
+  // console.log("closed, connecting");
   setTimeout(wait_prog_routine, 0);
-  if (was_connected)
+  if (was_connected) {
     colors_array = Array.from({ length: grid_size.x }, () =>
       Array.from({ length: grid_size.y }, () =>
-        Array.from({ length: grid_size.z }, () => new THREE.Color(0x050505))
+        Array.from(
+          { length: grid_size.z },
+          () => new THREE.Color(idle_anim.default_color)
+        )
       )
     );
+    idle_anim.points_list = [];
+  }
   was_connected = false;
   idle_anim.id = setInterval(idle_animation, idle_anim.delay);
 }
