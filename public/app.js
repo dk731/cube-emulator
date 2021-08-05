@@ -149,12 +149,11 @@ function idle_animation() {
 
 var wait_routine_id = setTimeout(wait_prog_routine, 0);
 var socket;
-var was_connected = false;
-var triggered_timeout = true;
+var ws_connected = false;
 function wait_prog_routine() {
   try {
     socket = new WebSocket("ws://localhost:8080");
-    // setTimeout(on_connect_timeout, connect_delay);
+
     socket.onopen = init_socket;
     socket.binaryType = "arraybuffer";
     socket.onmessage = on_prog_receive;
@@ -165,19 +164,33 @@ function wait_prog_routine() {
 }
 
 function init_socket(event) {
-  // console.log("SOCKET OPPENED!!!!!!!!!!!!!");
+  console.log("SOCKET OPPENED!!!!!!!!!!!!!");
   clearInterval(idle_anim.id);
-  was_connected = true;
+  ws_connected = true;
 }
 
 function on_prog_receive(event) {
-  cur_array = event.data;
+  const buf_view = new Uint8Array(event.data);
+
+  for (let z = 0; z < grid_size.z; z++)
+    for (let y = 0; y < grid_size.y; y++)
+      for (let x = 0; x < grid_size.x; x++) {
+        const ind = x + (y + z * grid_size.y) * grid_size.x;
+        const ind3 = ind * 3;
+        scene.children[ind].material.color.copy(
+          new THREE.Color(
+            buf_view[ind3],
+            buf_view[ind3 + 1],
+            buf_view[ind3 + 2]
+          )
+        );
+      }
 }
 
 function on_prog_close(event) {
-  // console.log("closed, connecting");
+  console.log("closed, connecting");
   setTimeout(wait_prog_routine, 0);
-  if (was_connected) {
+  if (ws_connected) {
     colors_array = Array.from({ length: grid_size.x }, () =>
       Array.from({ length: grid_size.y }, () =>
         Array.from(
@@ -187,9 +200,9 @@ function on_prog_close(event) {
       )
     );
     idle_anim.points_list = [];
+    idle_anim.id = setInterval(idle_animation, idle_anim.delay);
   }
-  was_connected = false;
-  idle_anim.id = setInterval(idle_animation, idle_anim.delay);
+  ws_connected = false;
 }
 
 //////////////////
@@ -253,27 +266,14 @@ function render() {
 }
 
 function update_colors() {
-  if (cur_array && cur_array.byteLength == 12288)
-    var arr_view = new Uint8Array(cur_array);
-
-  for (let z = 0; z < grid_size.z; z++)
-    for (let y = 0; y < grid_size.y; y++)
-      for (let x = 0; x < grid_size.x; x++) {
-        const ind = x + (y + z * grid_size.y) * grid_size.x;
-        const cur_obj = scene.children[ind];
-
-        if (cur_array && cur_array.byteLength == 12288)
-          var cur_color = new THREE.Color(
-            arr_view[ind * 3 + 1] / 255,
-            arr_view[ind * 3] / 255,
-            arr_view[ind * 3 + 2] / 255
-          );
-        else var cur_color = colors_array[x][y][z];
-
-        cur_obj.material.color.copy(cur_color);
-      }
-
-  cur_array = undefined;
+  if (!ws_connected)
+    // if not connected then just copy from local buffer
+    for (let z = 0; z < grid_size.z; z++)
+      for (let y = 0; y < grid_size.y; y++)
+        for (let x = 0; x < grid_size.x; x++)
+          scene.children[
+            x + (y + z * grid_size.y) * grid_size.x
+          ].material.color.copy(colors_array[x][y][z]);
 }
 
 function darkenNonBloomed(obj) {
