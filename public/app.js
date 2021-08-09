@@ -175,12 +175,12 @@ function on_prog_receive(event) {
   for (let z = 0; z < grid_size.z; z++)
     for (let y = 0; y < grid_size.y; y++)
       for (let x = 0; x < grid_size.x; x++) {
-        const ind = x + (y + z * grid_size.y) * grid_size.x;
+        const ind = x + (255 - (y + z * grid_size.y)) * grid_size.x;
         const ind3 = ind * 3;
         scene.children[ind].material.color.copy(
           new THREE.Color(
-            buf_view[ind3],
             buf_view[ind3 + 1],
+            buf_view[ind3],
             buf_view[ind3 + 2]
           )
         );
