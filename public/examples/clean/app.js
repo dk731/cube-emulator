@@ -80,7 +80,6 @@ function setup_grid_mesh() {
             .multiplyScalar(grid_dist)
             .add(start_point)
         );
-        sphere.layers.enable(BLOOM_SCENE);
         scene.add(sphere);
       }
     }
