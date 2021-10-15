@@ -4,7 +4,9 @@ import { EffectComposer } from "https://cdn.skypack.dev/three@v0.130.1-bsY6rEPcA
 import { RenderPass } from "https://cdn.skypack.dev/three@v0.130.1-bsY6rEPcA1ZYyZeKdbHd/examples/jsm/postprocessing/RenderPass.js";
 import { ShaderPass } from "https://cdn.skypack.dev/three@v0.130.1-bsY6rEPcA1ZYyZeKdbHd/examples/jsm/postprocessing/ShaderPass.js";
 import { UnrealBloomPass } from "https://cdn.skypack.dev/three@v0.130.1-bsY6rEPcA1ZYyZeKdbHd/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { EXRLoader } from "https://cdn.skypack.dev/three@v0.130.1-bsY6rEPcA1ZYyZeKdbHd/examples/jsm/loaders/EXRLoader.js";
 
+const exr_loader = new EXRLoader();
 var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera(
   75,
@@ -37,6 +39,59 @@ function windowResize() {
 }
 
 window.addEventListener("resize", windowResize);
+
+var backgrounds = {
+  none: { text: null, url: null, btn_id: "btnradio1" },
+  indors: {
+    text: null,
+    url: "https://dl.polyhaven.org/file/ph-assets/HDRIs/exr/2k/studio_country_hall_2k.exr",
+    btn_id: "btnradio3",
+  },
+  outdoors: {
+    text: null,
+    url: "https://dl.polyhaven.org/file/ph-assets/HDRIs/exr/2k/dikhololo_night_2k.exr",
+    btn_id: "btnradio2",
+  },
+};
+
+var cur_text = "none";
+
+function load_image(type) {
+  return new Promise((resolve, reject) => {
+    exr_loader.load(backgrounds[type].url, function (texture, textureData) {
+      const rt = new THREE.WebGLCubeRenderTarget(texture.image.height);
+      rt.fromEquirectangularTexture(renderer, texture);
+      backgrounds[type].text = rt.texture;
+      if (cur_text == type) scene.background = backgrounds[type].text;
+    });
+  });
+}
+
+async function load_backgrounds() {
+  var promise_list = [];
+  for (var type in backgrounds)
+    if (backgrounds[type].url) promise_list.push(load_image(type));
+
+  Promise.all(promise_list);
+}
+
+function on_back_change(type) {
+  console.log(type);
+  console.log(backgrounds[type]);
+  if (backgrounds[type].text == null) {
+    if (backgrounds[type].url == null)
+      scene.background = backgrounds[type].text;
+  } else scene.background = backgrounds[type].text;
+  cur_text = type;
+}
+
+Object.entries(backgrounds).forEach(([type, val]) => {
+  document.getElementById(val.btn_id).onclick = function () {
+    on_back_change(type);
+  };
+});
+
+load_backgrounds();
 
 /////////////////
 var sphere_r = 0.15;
@@ -259,7 +314,9 @@ function setup_grid_mesh() {
 
 function render() {
   scene.traverse(darkenNonBloomed);
+  scene.background = null;
   bloomComposer.render();
+  on_back_change(cur_text);
   scene.traverse(restoreMaterial);
 
   finalComposer.render();
