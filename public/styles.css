@@ -7,5 +7,6 @@ canvas {
 }
 
 .btn-group {
-  left: 90%;
+  left: 100%;
+  transform: translate(-100%);
 }
