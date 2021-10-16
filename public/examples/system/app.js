@@ -37,7 +37,7 @@ var sphere_r = 0.15;
 var grid_dist = 2.5;
 var grid_size = new THREE.Vector3(16, 16, 16);
 
-var start_color = 0.05;
+var start_color = 0.08;
 var start_point = new THREE.Vector3()
   .copy(grid_size)
   .subScalar(1)
@@ -56,122 +56,118 @@ const table_material = new THREE.MeshBasicMaterial({
   color: new THREE.Color(0x994c00),
 });
 
-// const plane = new THREE.Mesh(geometry, material);
+//////////////////////////////////////////////////////// Setup animation
+
+scene.add(
+  new THREE.ArrowHelper(
+    { x: 1, y: 0, z: 0 },
+    new THREE.Vector3().copy(start_point).add({ x: -2, y: 2, z: 2 }),
+    grid_size.x * grid_dist,
+    0xff0000
+  )
+);
+
+scene.add(
+  new THREE.ArrowHelper(
+    { x: 0, y: -1, z: 0 },
+    new THREE.Vector3().copy(start_point).add({ x: -2, y: 2, z: 2 }),
+    grid_size.x * grid_dist,
+    0x0000ff
+  )
+);
+
+scene.add(
+  new THREE.ArrowHelper(
+    { x: 0, y: 0, z: -1 },
+    new THREE.Vector3().copy(start_point).add({ x: -2, y: 2, z: 2 }),
+    grid_size.x * grid_dist,
+    0x00ff00
+  )
+);
+
+var loader = new THREE.FontLoader();
+
+loader.load(
+  "https://cdn.skypack.dev/three@v0.130.1-bsY6rEPcA1ZYyZeKdbHd/examples/fonts/helvetiker_regular.typeface.json",
+  function (font) {
+    var x = new THREE.Mesh(
+      new THREE.TextGeometry("X", {
+        font: font,
+        size: 80,
+        height: 4,
+        curveSegments: 12,
+        bevelEnabled: true,
+        bevelThickness: 2,
+        bevelSize: 8,
+        bevelOffset: 0,
+        bevelSegments: 5,
+      }),
+      new THREE.MeshBasicMaterial({
+        color: 0xff0000,
+      })
+    );
+    var y = new THREE.Mesh(
+      new THREE.TextGeometry("Y", {
+        font: font,
+        size: 80,
+        height: 4,
+        curveSegments: 12,
+        bevelEnabled: true,
+        bevelThickness: 2,
+        bevelSize: 8,
+        bevelOffset: 0,
+        bevelSegments: 5,
+      }),
+      new THREE.MeshBasicMaterial({
+        color: 0x0000ff,
+      })
+    );
+    var z = new THREE.Mesh(
+      new THREE.TextGeometry("Z", {
+        font: font,
+        size: 80,
+        height: 4,
+        curveSegments: 12,
+        bevelEnabled: true,
+        bevelThickness: 2,
+        bevelSize: 8,
+        bevelOffset: 0,
+        bevelSegments: 5,
+      }),
+      new THREE.MeshBasicMaterial({
+        color: 0x00ff00,
+      })
+    );
+    x.scale.copy({ x: 0.06, y: 0.06, z: 0.06 });
+    x.position.copy(
+      new THREE.Vector3()
+        .copy(start_point)
+        .add({ x: (grid_size.x * grid_dist) / 2.5, y: 3, z: 2 })
+    );
+    y.scale.copy({ x: 0.06, y: 0.06, z: 0.06 });
+    y.position.copy(
+      new THREE.Vector3()
+        .copy(start_point)
+        .add({ x: -4, y: -(grid_size.x * grid_dist) / 2, z: 1 })
+    );
+    y.rotateY(-Math.PI / 4);
+    z.scale.copy({ x: 0.06, y: 0.06, z: 0.06 });
+    z.position.copy(
+      new THREE.Vector3()
+        .copy(start_point)
+        .add({ x: -2, y: 3, z: -(grid_size.x * grid_dist) / 2.5 })
+    );
+    z.rotateY(-Math.PI / 2);
+    scene.add(x);
+    scene.add(y);
+    scene.add(z);
+  }
+);
+
+////////////////////////////////////////////////////////
 
 setup_grid_mesh();
 animate();
-
-//////////////////////////////////////////////////////// Setup animation
-
-function pos_to_ind(x, y, z) {
-  return x + (y + z * grid_size.y) * grid_size.x;
-}
-
-var start_pos = -(grid_dist * grid_size.x) / 2;
-
-var anim_objects = {
-  xplane: {
-    obj: new THREE.Mesh(
-      new THREE.PlaneGeometry(
-        grid_size.x * grid_dist * 1.2,
-        grid_size.x * grid_dist * 1.2
-      ),
-      new THREE.MeshBasicMaterial({
-        color: 0x00ff00,
-        side: THREE.DoubleSide,
-        opacity: 0.2,
-        transparent: true,
-      })
-    ),
-    anims: [
-      {
-        start_pos: { x: start_pos, y: 0, z: 0 },
-        end_pos: { x: start_pos + grid_dist * 4, y: 0, z: 0 },
-      },
-    ],
-  },
-  yplane: {
-    obj: new THREE.Mesh(
-      new THREE.PlaneGeometry(
-        grid_size.x * grid_dist * 1.2,
-        grid_size.x * grid_dist * 1.2
-      ),
-      new THREE.MeshBasicMaterial({
-        color: 0x0000ff,
-        side: THREE.DoubleSide,
-        opacity: 0.2,
-        transparent: true,
-      })
-    ),
-    anims: [{ start_pos: { x: 0, y: -start_pos, z: 0 } }],
-  },
-  zplane: {
-    obj: new THREE.Mesh(
-      new THREE.PlaneGeometry(
-        grid_size.x * grid_dist * 1.2,
-        grid_size.x * grid_dist * 1.2
-      ),
-      new THREE.MeshBasicMaterial({
-        color: 0xff0000,
-        side: THREE.DoubleSide,
-        opacity: 0.2,
-        transparent: true,
-      })
-    ),
-    anims: [{ start_pos: { x: 0, y: 0, z: -start_pos } }],
-  },
-  p1: {
-    ind_list: [pos_to_ind(0, 0, 0)],
-    start_f: {
-      r: start_color,
-      g: start_color,
-      b: start_color,
-      x: 1,
-      y: 1,
-      z: 1,
-    },
-    end_f: { r: 1, g: 1, b: 1, x: 2, y: 2, z: 2 },
-  },
-};
-
-anim_objects.xplane.obj.position.copy(anim_objects.xplane.anims[0].start_pos);
-anim_objects.yplane.obj.position.copy(anim_objects.yplane.anims[0].start_pos);
-anim_objects.zplane.obj.position.copy(anim_objects.zplane.anims[0].start_pos);
-
-anim_objects.yplane.obj.rotateX(Math.PI / 2);
-anim_objects.xplane.obj.rotateY(Math.PI / 2);
-
-scene.add(anim_objects.xplane.obj);
-scene.add(anim_objects.yplane.obj);
-scene.add(anim_objects.zplane.obj);
-
-var p1_m = new TWEEN.Tween(anim_objects.p1.start_f)
-  .delay(1500)
-  .to(anim_objects.p1.end_f, 800)
-  .easing(TWEEN.Easing.Sinusoidal.InOut);
-
-var xplan_m = new TWEEN.Tween(anim_objects.xplane.anims[0].start_pos)
-  .delay(500)
-  .to(anim_objects.xplane.anims[0].end_pos, 1000)
-  .easing(TWEEN.Easing.Sinusoidal.InOut);
-
-p1_m.onUpdate(function (obj) {
-  anim_objects.p1.ind_list.forEach((el) => {
-    scene.children[el].material.color.copy(obj);
-    scene.children[el].scale.copy(obj);
-  });
-});
-
-xplan_m.onUpdate(function (obj) {
-  anim_objects.xplane.obj.position.copy(obj);
-});
-
-p1_m.chain(xplan_m);
-xplan_m.chain(p1_m);
-
-p1_m.start();
-
-////////////////////////////////////////////////////////
 
 ////////////////
 
