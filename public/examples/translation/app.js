@@ -33,12 +33,12 @@ function windowResize() {
 window.addEventListener("resize", windowResize);
 
 /////////////////
-var sphere_r = 0.15;
-var grid_dist = 2.5;
-var grid_size = new THREE.Vector3(16, 16, 16);
+const sphere_r = 0.15;
+const grid_dist = 2.5;
+const grid_size = new THREE.Vector3(16, 16, 16);
 
-var start_color = 0.05;
-var start_point = new THREE.Vector3()
+const start_color = 0.05;
+const start_point = new THREE.Vector3()
   .copy(grid_size)
   .subScalar(1)
   .multiply(new THREE.Vector3(grid_dist, grid_dist, grid_dist))
@@ -59,7 +59,6 @@ const table_material = new THREE.MeshBasicMaterial({
 // const plane = new THREE.Mesh(geometry, material);
 
 setup_grid_mesh();
-animate();
 
 //////////////////////////////////////////////////////// Setup animation
 
@@ -67,58 +66,44 @@ function pos_to_ind(x, y, z) {
   return x + (y + z * grid_size.y) * grid_size.x;
 }
 
-var start_pos = -(grid_dist * grid_size.x) / 2;
+const origin_pos = new THREE.Vector3()
+  .copy(start_point)
+  .add({ x: -grid_dist / 2, y: grid_dist / 2, z: grid_dist / 2 });
+
+const first_move = new THREE.Vector3()
+  .copy(origin_pos)
+  .add({ x: grid_dist * 6, y: 0, z: 0 });
+
+const second_move = new THREE.Vector3()
+  .copy(origin_pos)
+  .add({ x: grid_dist * 8, y: -grid_dist * 9, z: -grid_dist * 5 });
+
+const def_arrow_size = 8;
 
 var anim_objects = {
-  xplane: {
-    obj: new THREE.Mesh(
-      new THREE.PlaneGeometry(
-        grid_size.x * grid_dist * 1.2,
-        grid_size.x * grid_dist * 1.2
-      ),
-      new THREE.MeshBasicMaterial({
-        color: 0x00ff00,
-        side: THREE.DoubleSide,
-        opacity: 0.2,
-        transparent: true,
-      })
+  arrow_x: {
+    obj: new THREE.ArrowHelper(
+      { x: 1, y: 0, z: 0 },
+      origin_pos,
+      def_arrow_size,
+      0xff0000
     ),
-    anims: [
-      {
-        start_pos: { x: start_pos, y: 0, z: 0 },
-        end_pos: { x: start_pos + grid_dist * 4, y: 0, z: 0 },
-      },
-    ],
   },
-  yplane: {
-    obj: new THREE.Mesh(
-      new THREE.PlaneGeometry(
-        grid_size.x * grid_dist * 1.2,
-        grid_size.x * grid_dist * 1.2
-      ),
-      new THREE.MeshBasicMaterial({
-        color: 0x0000ff,
-        side: THREE.DoubleSide,
-        opacity: 0.2,
-        transparent: true,
-      })
+  arrow_y: {
+    obj: new THREE.ArrowHelper(
+      { x: 0, y: -1, z: 0 },
+      origin_pos,
+      def_arrow_size,
+      0x0000ff
     ),
-    anims: [{ start_pos: { x: 0, y: -start_pos, z: 0 } }],
   },
-  zplane: {
-    obj: new THREE.Mesh(
-      new THREE.PlaneGeometry(
-        grid_size.x * grid_dist * 1.2,
-        grid_size.x * grid_dist * 1.2
-      ),
-      new THREE.MeshBasicMaterial({
-        color: 0xff0000,
-        side: THREE.DoubleSide,
-        opacity: 0.2,
-        transparent: true,
-      })
+  arrow_z: {
+    obj: new THREE.ArrowHelper(
+      { x: 0, y: 0, z: -1 },
+      origin_pos,
+      def_arrow_size,
+      0x00ff00
     ),
-    anims: [{ start_pos: { x: 0, y: 0, z: -start_pos } }],
   },
   p1: {
     ind_list: [pos_to_ind(0, 0, 0)],
@@ -132,28 +117,86 @@ var anim_objects = {
     },
     end_f: { r: 1, g: 1, b: 1, x: 2, y: 2, z: 2 },
   },
+  p2: {
+    ind_list: [pos_to_ind(6, 0, 0)],
+    start_f: {
+      r: start_color,
+      g: start_color,
+      b: start_color,
+      x: 1,
+      y: 1,
+      z: 1,
+    },
+    end_f: { r: 1, g: 1, b: 1, x: 2, y: 2, z: 2 },
+  },
+  p3: {
+    ind_list: [pos_to_ind(8, 9, 5)],
+    start_f: {
+      r: start_color,
+      g: start_color,
+      b: start_color,
+      x: 1,
+      y: 1,
+      z: 1,
+    },
+    end_f: { r: 1, g: 0, b: 0, x: 2.5, y: 2.5, z: 2.5 },
+  },
 };
 
-anim_objects.xplane.obj.position.copy(anim_objects.xplane.anims[0].start_pos);
-anim_objects.yplane.obj.position.copy(anim_objects.yplane.anims[0].start_pos);
-anim_objects.zplane.obj.position.copy(anim_objects.zplane.anims[0].start_pos);
-
-anim_objects.yplane.obj.rotateX(Math.PI / 2);
-anim_objects.xplane.obj.rotateY(Math.PI / 2);
-
-scene.add(anim_objects.xplane.obj);
-scene.add(anim_objects.yplane.obj);
-scene.add(anim_objects.zplane.obj);
+scene.add(anim_objects.arrow_x.obj);
+scene.add(anim_objects.arrow_y.obj);
+scene.add(anim_objects.arrow_z.obj);
 
 var p1_m = new TWEEN.Tween(anim_objects.p1.start_f)
   .delay(1500)
-  .to(anim_objects.p1.end_f, 800)
+  .to(anim_objects.p1.end_f, 1000)
+  .easing(TWEEN.Easing.Sinusoidal.InOut)
+  .delay(2000);
+
+var p2_m = new TWEEN.Tween(anim_objects.p2.start_f)
+  .delay(500)
+  .to(anim_objects.p2.end_f, 1000)
   .easing(TWEEN.Easing.Sinusoidal.InOut);
 
-var xplan_m = new TWEEN.Tween(anim_objects.xplane.anims[0].start_pos)
+var p3_m = new TWEEN.Tween(anim_objects.p3.start_f)
   .delay(500)
-  .to(anim_objects.xplane.anims[0].end_pos, 1000)
+  .to(anim_objects.p3.end_f, 1000)
   .easing(TWEEN.Easing.Sinusoidal.InOut);
+
+var origin1_m = new TWEEN.Tween(origin_pos)
+  .delay(1000)
+  .to(first_move, 2000)
+  .easing(TWEEN.Easing.Sinusoidal.InOut);
+
+var origin2_m = new TWEEN.Tween(origin_pos)
+  .delay(1000)
+  .to(second_move, 2000)
+  .easing(TWEEN.Easing.Sinusoidal.InOut);
+
+var arrow1_len = new TWEEN.Tween({ lenx: def_arrow_size })
+  .delay(800)
+  .to({ lenx: def_arrow_size + 2 }, 800)
+  .easing(TWEEN.Easing.Sinusoidal.InOut)
+  .repeat(1)
+  .yoyo(true);
+
+var arrow2_len = new TWEEN.Tween({
+  lenx: def_arrow_size,
+  leny: def_arrow_size,
+  lenz: def_arrow_size,
+})
+  .delay(800)
+  .to(
+    {
+      lenx: def_arrow_size + 1,
+      leny: def_arrow_size + 3,
+      lenz: def_arrow_size + 2.5,
+    },
+    800
+  )
+  .easing(TWEEN.Easing.Sinusoidal.InOut)
+  .repeat(1)
+  .yoyo(true);
 
 p1_m.onUpdate(function (obj) {
   anim_objects.p1.ind_list.forEach((el) => {
@@ -162,18 +205,73 @@ p1_m.onUpdate(function (obj) {
   });
 });
 
-xplan_m.onUpdate(function (obj) {
-  anim_objects.xplane.obj.position.copy(obj);
+p2_m.onUpdate(function (obj) {
+  anim_objects.p2.ind_list.forEach((el) => {
+    scene.children[el].material.color.copy(obj);
+    scene.children[el].scale.copy(obj);
+  });
 });
 
-p1_m.chain(xplan_m);
-xplan_m.chain(p1_m);
+p3_m.onUpdate(function (obj) {
+  anim_objects.p3.ind_list.forEach((el) => {
+    scene.children[el].material.color.copy(obj);
+    scene.children[el].scale.copy(obj);
+  });
+});
+
+origin1_m.onUpdate(function (obj) {
+  anim_objects.arrow_x.obj.position.copy(obj);
+  anim_objects.arrow_y.obj.position.copy(obj);
+  anim_objects.arrow_z.obj.position.copy(obj);
+});
+
+origin2_m.onUpdate(function (obj) {
+  anim_objects.arrow_x.obj.position.copy(obj);
+  anim_objects.arrow_y.obj.position.copy(obj);
+  anim_objects.arrow_z.obj.position.copy(obj);
+});
+
+arrow1_len.onUpdate(function (obj) {
+  anim_objects.arrow_x.obj.setLength(obj.lenx);
+});
+
+arrow2_len.onUpdate(function (obj) {
+  anim_objects.arrow_x.obj.setLength(obj.lenx);
+  anim_objects.arrow_y.obj.setLength(obj.leny);
+  anim_objects.arrow_z.obj.setLength(obj.lenz);
+});
+
+p1_m.chain(origin1_m, arrow1_len);
+origin1_m.chain(p2_m);
+p2_m.chain(origin2_m, arrow2_len);
+origin2_m.chain(p3_m);
+
+p3_m.onComplete(() => {
+  setTimeout(setup_scene, 2000);
+});
+
+function setup_scene() {
+  for (var i = 0; i < grid_size.x * grid_size.y * grid_size.z; i++) {
+    scene.children[i].material.color.copy({
+      r: start_color,
+      g: start_color,
+      b: start_color,
+    });
+    const tmp = new THREE.Vector3()
+      .copy(start_point)
+      .add({ x: -grid_dist / 2, y: grid_dist / 2, z: grid_dist / 2 });
+    anim_objects.arrow_x.obj.position.copy(tmp);
+    anim_objects.arrow_y.obj.position.copy(tmp);
+    anim_objects.arrow_z.obj.position.copy(tmp);
+  }
+  p1_m.start();
+}
 
 p1_m.start();
 
 ////////////////////////////////////////////////////////
 
-////////////////
+animate();
 
 function animate() {
   requestAnimationFrame(animate);
