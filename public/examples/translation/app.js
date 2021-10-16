@@ -70,6 +70,8 @@ const origin_pos = new THREE.Vector3()
   .copy(start_point)
   .add({ x: -grid_dist / 2, y: grid_dist / 2, z: grid_dist / 2 });
 
+const unchanged_start = new THREE.Vector3().copy(origin_pos);
+
 const first_move = new THREE.Vector3()
   .copy(origin_pos)
   .add({ x: grid_dist * 6, y: 0, z: 0 });
@@ -139,7 +141,19 @@ var anim_objects = {
       y: 1,
       z: 1,
     },
-    end_f: { r: 1, g: 0, b: 0, x: 2.5, y: 2.5, z: 2.5 },
+    end_f: { r: 1, g: 1, b: 1, x: 2, y: 2, z: 2 },
+  },
+  p4: {
+    ind_list: [pos_to_ind(8, 9, 5), pos_to_ind(6, 0, 0), pos_to_ind(0, 0, 0)],
+    start_f: { r: 1, g: 1, b: 1, x: 2, y: 2, z: 2 },
+    end_f: {
+      r: start_color,
+      g: start_color,
+      b: start_color,
+      x: 1,
+      y: 1,
+      z: 1,
+    },
   },
 };
 
@@ -163,6 +177,11 @@ var p3_m = new TWEEN.Tween(anim_objects.p3.start_f)
   .to(anim_objects.p3.end_f, 1000)
   .easing(TWEEN.Easing.Sinusoidal.InOut);
 
+var p4_m = new TWEEN.Tween(anim_objects.p4.start_f)
+  .delay(500)
+  .to(anim_objects.p4.end_f, 1000)
+  .easing(TWEEN.Easing.Sinusoidal.InOut);
+
 var origin1_m = new TWEEN.Tween(origin_pos)
   .delay(1000)
   .to(first_move, 2000)
@@ -171,6 +190,11 @@ var origin1_m = new TWEEN.Tween(origin_pos)
 var origin2_m = new TWEEN.Tween(origin_pos)
   .delay(1000)
   .to(second_move, 2000)
+  .easing(TWEEN.Easing.Sinusoidal.InOut);
+
+var origin3_m = new TWEEN.Tween(origin_pos)
+  .delay(1000)
+  .to(unchanged_start, 1000)
   .easing(TWEEN.Easing.Sinusoidal.InOut);
 
 var arrow1_len = new TWEEN.Tween({ lenx: def_arrow_size })
@@ -219,6 +243,13 @@ p3_m.onUpdate(function (obj) {
   });
 });
 
+p4_m.onUpdate(function (obj) {
+  anim_objects.p4.ind_list.forEach((el) => {
+    scene.children[el].material.color.copy(obj);
+    scene.children[el].scale.copy(obj);
+  });
+});
+
 origin1_m.onUpdate(function (obj) {
   anim_objects.arrow_x.obj.position.copy(obj);
   anim_objects.arrow_y.obj.position.copy(obj);
@@ -226,6 +257,12 @@ origin1_m.onUpdate(function (obj) {
 });
 
 origin2_m.onUpdate(function (obj) {
+  anim_objects.arrow_x.obj.position.copy(obj);
+  anim_objects.arrow_y.obj.position.copy(obj);
+  anim_objects.arrow_z.obj.position.copy(obj);
+});
+
+origin3_m.onUpdate(function (obj) {
   anim_objects.arrow_x.obj.position.copy(obj);
   anim_objects.arrow_y.obj.position.copy(obj);
   anim_objects.arrow_z.obj.position.copy(obj);
@@ -245,27 +282,29 @@ p1_m.chain(origin1_m, arrow1_len);
 origin1_m.chain(p2_m);
 p2_m.chain(origin2_m, arrow2_len);
 origin2_m.chain(p3_m);
+p3_m.chain(origin3_m, p4_m);
+origin3_m.chain(p1_m);
 
-p3_m.onComplete(() => {
-  setTimeout(setup_scene, 2000);
-});
+// p3_m.onComplete(() => {
+//   setTimeout(setup_scene, 2000);
+// });
 
-function setup_scene() {
-  for (var i = 0; i < grid_size.x * grid_size.y * grid_size.z; i++) {
-    scene.children[i].material.color.copy({
-      r: start_color,
-      g: start_color,
-      b: start_color,
-    });
-    const tmp = new THREE.Vector3()
-      .copy(start_point)
-      .add({ x: -grid_dist / 2, y: grid_dist / 2, z: grid_dist / 2 });
-    anim_objects.arrow_x.obj.position.copy(tmp);
-    anim_objects.arrow_y.obj.position.copy(tmp);
-    anim_objects.arrow_z.obj.position.copy(tmp);
-  }
-  p1_m.start();
-}
+// function setup_scene() {
+//   for (var i = 0; i < grid_size.x * grid_size.y * grid_size.z; i++) {
+//     scene.children[i].material.color.copy({
+//       r: start_color,
+//       g: start_color,
+//       b: start_color,
+//     });
+//     const tmp = new THREE.Vector3()
+//       .copy(start_point)
+//       .add({ x: -grid_dist / 2, y: grid_dist / 2, z: grid_dist / 2 });
+//     anim_objects.arrow_x.obj.position.copy(tmp);
+//     anim_objects.arrow_y.obj.position.copy(tmp);
+//     anim_objects.arrow_z.obj.position.copy(tmp);
+//   }
+//   p1_m.start();
+// }
 
 p1_m.start();
 
