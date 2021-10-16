@@ -173,7 +173,7 @@ animate();
 function animate() {
   requestAnimationFrame(animate);
   controls.update();
-  TWEEN.update();
+
   render();
 }
 
