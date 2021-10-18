@@ -1,6 +1,8 @@
 import * as THREE from "https://cdn.skypack.dev/pin/three@v0.130.1-bsY6rEPcA1ZYyZeKdbHd/mode=imports/optimized/three.js";
 import { OrbitControls } from "https://cdn.skypack.dev/three@v0.130.1-bsY6rEPcA1ZYyZeKdbHd/examples/jsm/controls/OrbitControls.js";
 import * as TWEEN from "https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.esm.js";
+
+parent.postMessage(-1, "*");
 var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera(
   75,
@@ -21,7 +23,6 @@ controls.update();
 
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
-renderer.toneMapping = THREE.ReinhardToneMapping;
 document.body.appendChild(renderer.domElement);
 
 function windowResize() {
@@ -37,7 +38,7 @@ const sphere_r = 0.15;
 const grid_dist = 2.5;
 const grid_size = new THREE.Vector3(16, 16, 16);
 
-const start_color = 0.05;
+const start_color = 0.08;
 const start_point = new THREE.Vector3()
   .copy(grid_size)
   .subScalar(1)
@@ -53,12 +54,14 @@ const table_geometry = new THREE.BoxGeometry(
 );
 
 const table_material = new THREE.MeshBasicMaterial({
-  color: new THREE.Color(0x994c00),
+  color: new THREE.Color(0x854c00),
 });
 
 // const plane = new THREE.Mesh(geometry, material);
 
 setup_grid_mesh();
+const light = new THREE.AmbientLight(); // soft white light
+scene.add(light);
 
 //////////////////////////////////////////////////////// Setup animation
 
@@ -117,7 +120,7 @@ var anim_objects = {
       y: 1,
       z: 1,
     },
-    end_f: { r: 1, g: 1, b: 1, x: 2, y: 2, z: 2 },
+    end_f: { r: 1, g: 1, b: 1, x: 3, y: 3, z: 3 },
   },
   p2: {
     ind_list: [pos_to_ind(6, 0, 0)],
@@ -129,7 +132,7 @@ var anim_objects = {
       y: 1,
       z: 1,
     },
-    end_f: { r: 1, g: 1, b: 1, x: 2, y: 2, z: 2 },
+    end_f: { r: 1, g: 1, b: 1, x: 3, y: 3, z: 3 },
   },
   p3: {
     ind_list: [pos_to_ind(8, 9, 5)],
@@ -141,11 +144,11 @@ var anim_objects = {
       y: 1,
       z: 1,
     },
-    end_f: { r: 1, g: 1, b: 1, x: 2, y: 2, z: 2 },
+    end_f: { r: 1, g: 1, b: 1, x: 3, y: 3, z: 3 },
   },
   p4: {
     ind_list: [pos_to_ind(8, 9, 5), pos_to_ind(6, 0, 0), pos_to_ind(0, 0, 0)],
-    start_f: { r: 1, g: 1, b: 1, x: 2, y: 2, z: 2 },
+    start_f: { r: 1, g: 1, b: 1, x: 3, y: 3, z: 3 },
     end_f: {
       r: start_color,
       g: start_color,
@@ -162,44 +165,50 @@ scene.add(anim_objects.arrow_y.obj);
 scene.add(anim_objects.arrow_z.obj);
 
 var p1_m = new TWEEN.Tween(anim_objects.p1.start_f)
-  .delay(1500)
-  .to(anim_objects.p1.end_f, 1000)
+  .delay(2000)
+  .to(anim_objects.p1.end_f, 2000)
   .easing(TWEEN.Easing.Sinusoidal.InOut)
-  .delay(2000);
+  .onStart(() => parent.postMessage(1, "*"));
 
 var p2_m = new TWEEN.Tween(anim_objects.p2.start_f)
-  .delay(500)
-  .to(anim_objects.p2.end_f, 1000)
-  .easing(TWEEN.Easing.Sinusoidal.InOut);
+  .delay(1000)
+  .to(anim_objects.p2.end_f, 2000)
+  .easing(TWEEN.Easing.Sinusoidal.InOut)
+  .onStart(() => parent.postMessage(3, "*"));
 
 var p3_m = new TWEEN.Tween(anim_objects.p3.start_f)
-  .delay(500)
-  .to(anim_objects.p3.end_f, 1000)
-  .easing(TWEEN.Easing.Sinusoidal.InOut);
+  .delay(1000)
+  .to(anim_objects.p3.end_f, 2000)
+  .easing(TWEEN.Easing.Sinusoidal.InOut)
+  .onStart(() => parent.postMessage(5, "*"));
 
 var p4_m = new TWEEN.Tween(anim_objects.p4.start_f)
-  .delay(500)
-  .to(anim_objects.p4.end_f, 1000)
-  .easing(TWEEN.Easing.Sinusoidal.InOut);
+  .delay(1000)
+  .to(anim_objects.p4.end_f, 2000)
+  .easing(TWEEN.Easing.Sinusoidal.InOut)
+  .onStart(() => parent.postMessage(0, "*"));
 
 var origin1_m = new TWEEN.Tween(origin_pos)
   .delay(1000)
   .to(first_move, 2000)
-  .easing(TWEEN.Easing.Sinusoidal.InOut);
+  .easing(TWEEN.Easing.Sinusoidal.InOut)
+  .onStart(() => parent.postMessage(2, "*"));
 
 var origin2_m = new TWEEN.Tween(origin_pos)
   .delay(1000)
   .to(second_move, 2000)
-  .easing(TWEEN.Easing.Sinusoidal.InOut);
+  .easing(TWEEN.Easing.Sinusoidal.InOut)
+  .onStart(() => parent.postMessage(4, "*"));
 
 var origin3_m = new TWEEN.Tween(origin_pos)
   .delay(1000)
-  .to(unchanged_start, 1000)
-  .easing(TWEEN.Easing.Sinusoidal.InOut);
+  .to(unchanged_start, 2000)
+  .easing(TWEEN.Easing.Sinusoidal.InOut)
+  .onStart(() => parent.postMessage(6, "*"));
 
 var arrow1_len = new TWEEN.Tween({ lenx: def_arrow_size })
   .delay(800)
-  .to({ lenx: def_arrow_size + 2 }, 800)
+  .to({ lenx: def_arrow_size + 2 }, 900)
   .easing(TWEEN.Easing.Sinusoidal.InOut)
   .repeat(1)
   .yoyo(true);
@@ -216,7 +225,7 @@ var arrow2_len = new TWEEN.Tween({
       leny: def_arrow_size + 3,
       lenz: def_arrow_size + 2.5,
     },
-    800
+    900
   )
   .easing(TWEEN.Easing.Sinusoidal.InOut)
   .repeat(1)
@@ -282,8 +291,9 @@ p1_m.chain(origin1_m, arrow1_len);
 origin1_m.chain(p2_m);
 p2_m.chain(origin2_m, arrow2_len);
 origin2_m.chain(p3_m);
-p3_m.chain(origin3_m, p4_m);
-origin3_m.chain(p1_m);
+p3_m.chain(origin3_m);
+origin3_m.chain(p4_m);
+p4_m.chain(p1_m);
 
 // p3_m.onComplete(() => {
 //   setTimeout(setup_scene, 2000);
