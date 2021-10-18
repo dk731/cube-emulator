@@ -2,7 +2,7 @@ import * as THREE from "https://cdn.skypack.dev/pin/three@v0.130.1-bsY6rEPcA1ZYy
 import { OrbitControls } from "https://cdn.skypack.dev/three@v0.130.1-bsY6rEPcA1ZYyZeKdbHd/examples/jsm/controls/OrbitControls.js";
 import * as TWEEN from "https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.esm.js";
 
-parent.postMessage(-1, "*");
+////////////////////////////////////////////////////// Init WebGL Scene and Camera objects
 var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera(
   75,
@@ -33,7 +33,9 @@ function windowResize() {
 
 window.addEventListener("resize", windowResize);
 
-/////////////////
+////////////////////////////////////////////////////// \Init WebGL Scene and Camera objects
+
+////////////////////////////////////////////////////// Setup Scene objects
 const sphere_r = 0.15;
 const grid_dist = 2.5;
 const grid_size = new THREE.Vector3(16, 16, 16);
@@ -62,8 +64,9 @@ const table_material = new THREE.MeshBasicMaterial({
 setup_grid_mesh();
 const light = new THREE.AmbientLight(); // soft white light
 scene.add(light);
+////////////////////////////////////////////////////// \Setup Scene objects
 
-//////////////////////////////////////////////////////// Setup animation
+////////////////////////////////////////////////////// Setup Animations
 
 function pos_to_ind(x, y, z) {
   return x + (y + z * grid_size.y) * grid_size.x;
@@ -85,7 +88,7 @@ const second_move = new THREE.Vector3()
 
 const def_arrow_size = 8;
 
-var anim_objects = {
+const anim_objects = {
   arrow_x: {
     obj: new THREE.ArrowHelper(
       { x: 1, y: 0, z: 0 },
@@ -160,9 +163,7 @@ var anim_objects = {
   },
 };
 
-scene.add(anim_objects.arrow_x.obj);
-scene.add(anim_objects.arrow_y.obj);
-scene.add(anim_objects.arrow_z.obj);
+//////////////////////////////////////////////////////
 
 var p1_m = new TWEEN.Tween(anim_objects.p1.start_f)
   .delay(2000)
@@ -231,96 +232,24 @@ var arrow2_len = new TWEEN.Tween({
   .repeat(1)
   .yoyo(true);
 
-p1_m.onUpdate(function (obj) {
-  anim_objects.p1.ind_list.forEach((el) => {
-    scene.children[el].material.color.copy(obj);
-    scene.children[el].scale.copy(obj);
-  });
-});
+//////////////////////////////////////////////////////
 
-p2_m.onUpdate(function (obj) {
-  anim_objects.p2.ind_list.forEach((el) => {
-    scene.children[el].material.color.copy(obj);
-    scene.children[el].scale.copy(obj);
-  });
-});
+setup_animation_updates();
+setup_animation_chains();
 
-p3_m.onUpdate(function (obj) {
-  anim_objects.p3.ind_list.forEach((el) => {
-    scene.children[el].material.color.copy(obj);
-    scene.children[el].scale.copy(obj);
-  });
-});
+scene.add(anim_objects.arrow_x.obj);
+scene.add(anim_objects.arrow_y.obj);
+scene.add(anim_objects.arrow_z.obj);
 
-p4_m.onUpdate(function (obj) {
-  anim_objects.p4.ind_list.forEach((el) => {
-    scene.children[el].material.color.copy(obj);
-    scene.children[el].scale.copy(obj);
-  });
-});
-
-origin1_m.onUpdate(function (obj) {
-  anim_objects.arrow_x.obj.position.copy(obj);
-  anim_objects.arrow_y.obj.position.copy(obj);
-  anim_objects.arrow_z.obj.position.copy(obj);
-});
-
-origin2_m.onUpdate(function (obj) {
-  anim_objects.arrow_x.obj.position.copy(obj);
-  anim_objects.arrow_y.obj.position.copy(obj);
-  anim_objects.arrow_z.obj.position.copy(obj);
-});
-
-origin3_m.onUpdate(function (obj) {
-  anim_objects.arrow_x.obj.position.copy(obj);
-  anim_objects.arrow_y.obj.position.copy(obj);
-  anim_objects.arrow_z.obj.position.copy(obj);
-});
-
-arrow1_len.onUpdate(function (obj) {
-  anim_objects.arrow_x.obj.setLength(obj.lenx);
-});
-
-arrow2_len.onUpdate(function (obj) {
-  anim_objects.arrow_x.obj.setLength(obj.lenx);
-  anim_objects.arrow_y.obj.setLength(obj.leny);
-  anim_objects.arrow_z.obj.setLength(obj.lenz);
-});
-
-p1_m.chain(origin1_m, arrow1_len);
-origin1_m.chain(p2_m);
-p2_m.chain(origin2_m, arrow2_len);
-origin2_m.chain(p3_m);
-p3_m.chain(origin3_m);
-origin3_m.chain(p4_m);
-p4_m.chain(p1_m);
-
-// p3_m.onComplete(() => {
-//   setTimeout(setup_scene, 2000);
-// });
-
-// function setup_scene() {
-//   for (var i = 0; i < grid_size.x * grid_size.y * grid_size.z; i++) {
-//     scene.children[i].material.color.copy({
-//       r: start_color,
-//       g: start_color,
-//       b: start_color,
-//     });
-//     const tmp = new THREE.Vector3()
-//       .copy(start_point)
-//       .add({ x: -grid_dist / 2, y: grid_dist / 2, z: grid_dist / 2 });
-//     anim_objects.arrow_x.obj.position.copy(tmp);
-//     anim_objects.arrow_y.obj.position.copy(tmp);
-//     anim_objects.arrow_z.obj.position.copy(tmp);
-//   }
-//   p1_m.start();
-// }
-
-p1_m.start();
+////////////////////////////////////////////////////// \Setup Animations
 
 ////////////////////////////////////////////////////////
 
+parent.postMessage(-1, "*");
+p1_m.start();
 animate();
+
+////////////////////////////////////////////////////////
 
 function animate() {
   requestAnimationFrame(animate);
@@ -356,4 +285,72 @@ function setup_grid_mesh() {
 
 function render() {
   renderer.render(scene, camera);
+}
+
+function setup_animation_updates() {
+  p1_m.onUpdate(function (obj) {
+    anim_objects.p1.ind_list.forEach((el) => {
+      scene.children[el].material.color.copy(obj);
+      scene.children[el].scale.copy(obj);
+    });
+  });
+
+  origin1_m.onUpdate(function (obj) {
+    anim_objects.arrow_x.obj.position.copy(obj);
+    anim_objects.arrow_y.obj.position.copy(obj);
+    anim_objects.arrow_z.obj.position.copy(obj);
+  });
+
+  p2_m.onUpdate(function (obj) {
+    anim_objects.p2.ind_list.forEach((el) => {
+      scene.children[el].material.color.copy(obj);
+      scene.children[el].scale.copy(obj);
+    });
+  });
+
+  origin2_m.onUpdate(function (obj) {
+    anim_objects.arrow_x.obj.position.copy(obj);
+    anim_objects.arrow_y.obj.position.copy(obj);
+    anim_objects.arrow_z.obj.position.copy(obj);
+  });
+
+  p3_m.onUpdate(function (obj) {
+    anim_objects.p3.ind_list.forEach((el) => {
+      scene.children[el].material.color.copy(obj);
+      scene.children[el].scale.copy(obj);
+    });
+  });
+
+  origin3_m.onUpdate(function (obj) {
+    anim_objects.arrow_x.obj.position.copy(obj);
+    anim_objects.arrow_y.obj.position.copy(obj);
+    anim_objects.arrow_z.obj.position.copy(obj);
+  });
+
+  p4_m.onUpdate(function (obj) {
+    anim_objects.p4.ind_list.forEach((el) => {
+      scene.children[el].material.color.copy(obj);
+      scene.children[el].scale.copy(obj);
+    });
+  });
+
+  arrow1_len.onUpdate(function (obj) {
+    anim_objects.arrow_x.obj.setLength(obj.lenx);
+  });
+
+  arrow2_len.onUpdate(function (obj) {
+    anim_objects.arrow_x.obj.setLength(obj.lenx);
+    anim_objects.arrow_y.obj.setLength(obj.leny);
+    anim_objects.arrow_z.obj.setLength(obj.lenz);
+  });
+}
+
+function setup_animation_chains() {
+  p1_m.chain(origin1_m, arrow1_len);
+  origin1_m.chain(p2_m);
+  p2_m.chain(origin2_m, arrow2_len);
+  origin2_m.chain(p3_m);
+  p3_m.chain(origin3_m);
+  origin3_m.chain(p4_m);
+  p4_m.chain(p1_m);
 }

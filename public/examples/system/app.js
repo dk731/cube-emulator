@@ -1,5 +1,7 @@
 import * as THREE from "https://cdn.skypack.dev/pin/three@v0.130.1-bsY6rEPcA1ZYyZeKdbHd/mode=imports/optimized/three.js";
 import { OrbitControls } from "https://cdn.skypack.dev/three@v0.130.1-bsY6rEPcA1ZYyZeKdbHd/examples/jsm/controls/OrbitControls.js";
+
+////////////////////////////////////////////////////// Init WebGL Scene and Camera objects
 var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera(
   75,
@@ -20,7 +22,6 @@ controls.update();
 
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
-renderer.toneMapping = THREE.ReinhardToneMapping;
 document.body.appendChild(renderer.domElement);
 
 function windowResize() {
@@ -31,13 +32,15 @@ function windowResize() {
 
 window.addEventListener("resize", windowResize);
 
-/////////////////
-var sphere_r = 0.15;
-var grid_dist = 2.5;
-var grid_size = new THREE.Vector3(16, 16, 16);
+////////////////////////////////////////////////////// \Init WebGL Scene and Camera objects
 
-var start_color = 0.08;
-var start_point = new THREE.Vector3()
+////////////////////////////////////////////////////// Setup Scene objects
+const sphere_r = 0.15;
+const grid_dist = 2.5;
+const grid_size = new THREE.Vector3(16, 16, 16);
+
+const start_color = 0.08;
+const start_point = new THREE.Vector3()
   .copy(grid_size)
   .subScalar(1)
   .multiply(new THREE.Vector3(grid_dist, grid_dist, grid_dist))
@@ -52,10 +55,15 @@ const table_geometry = new THREE.BoxGeometry(
 );
 
 const table_material = new THREE.MeshBasicMaterial({
-  color: new THREE.Color(0x994c00),
+  color: new THREE.Color(0x854c00),
 });
 
-//////////////////////////////////////////////////////// Setup animation
+setup_grid_mesh();
+const light = new THREE.AmbientLight(); // soft white light
+scene.add(light);
+////////////////////////////////////////////////////// \Setup Scene objects
+
+//////////////////////////////////////////////////////// Setup arrow objects
 
 scene.add(
   new THREE.ArrowHelper(
@@ -163,12 +171,11 @@ loader.load(
   }
 );
 
-////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////// \Setup arrow objects
 
-setup_grid_mesh();
 animate();
 
-////////////////
+////////////////////////////////////////////////////////
 
 function animate() {
   requestAnimationFrame(animate);
