@@ -68,60 +68,157 @@ scene.add(light);
 
 ////////////////////////////////////////////////////// Setup Animations
 
-function pos_to_ind(x, y, z) {
-  return x + (y + z * grid_size.y) * grid_size.x;
+function pos_to_ind(vec) {
+  return vec[0] + (vec[1] + vec[2] * grid_size.y) * grid_size.x;
 }
 
-const rand_int = (u) => {
-  return Math.floor(Math.random() * u);
-};
+const lines_points = [
+  {
+    start_f: {
+      r: start_color,
+      g: start_color,
+      b: start_color,
+      x: 1,
+      y: 1,
+      z: 1,
+    },
+    end_f: {
+      r: 0.35294117647058826,
+      g: 0.8588235294117647,
+      b: 1.0,
+      x: 3,
+      y: 3,
+      z: 3,
+    },
+    points: [0, 16, 32, 48, 64, 80, 96, 112, 128, 144],
+  },
+  {
+    start_f: {
+      r: start_color,
+      g: start_color,
+      b: start_color,
+      x: 1,
+      y: 1,
+      z: 1,
+    },
+    end_f: {
+      r: 0.49019607843137253,
+      g: 0.11372549019607843,
+      b: 0.24705882352941178,
+      x: 3,
+      y: 3,
+      z: 3,
+    },
+    points: [3855, 3599, 3343, 3087, 2831, 2575, 2319],
+  },
+  {
+    start_f: {
+      r: start_color,
+      g: start_color,
+      b: start_color,
+      x: 1,
+      y: 1,
+      z: 1,
+    },
+    end_f: {
+      r: 0.8941176470588236,
+      g: 0.9411764705882353,
+      b: 0.8156862745098039,
+      x: 3,
+      y: 3,
+      z: 3,
+    },
+    points: [
+      3840, 3601, 3362, 3123, 2884, 2645, 2406, 2167, 1928, 1689, 1450, 1211,
+      972, 733, 494, 255,
+    ],
+  },
+  {
+    start_f: {
+      r: start_color,
+      g: start_color,
+      b: start_color,
+      x: 1,
+      y: 1,
+      z: 1,
+    },
+    end_f: {
+      r: 0.1058823529411764,
+      g: 0.1725490196078431,
+      b: 0.7568627450980392,
+      x: 3,
+      y: 3,
+      z: 3,
+    },
+    points: [
+      240, 497, 754, 1011, 1268, 1525, 1782, 2039, 2296, 2553, 2810, 3067, 3324,
+      3581, 3838, 4095,
+    ],
+  },
+];
 
-function point_spawner() {
-  parent.postMessage(1, "*");
-  var tmp_start = {
-    r: start_color,
-    g: start_color,
-    b: start_color,
-    x: 1,
-    y: 1,
-    z: 1,
-  };
-  const cur_pos = pos_to_ind(rand_int(15), rand_int(15), rand_int(15));
-  new TWEEN.Tween(tmp_start)
-    .to(
-      {
-        r: Math.random(),
-        g: Math.random(),
-        b: Math.random(),
-        x: 3,
-        y: 3,
-        z: 3,
-      },
-      1500
-    )
-    .easing(TWEEN.Easing.Sinusoidal.InOut)
-    .onComplete(() => {
-      parent.postMessage(2, "*");
-      setTimeout(() => {
-        parent.postMessage(0, "*");
-        setTimeout(point_spawner, 1500);
-      }, 1500);
-    })
-    .onUpdate(function (obj) {
-      scene.children[cur_pos].material.color.copy(obj);
-      scene.children[cur_pos].scale.copy(obj);
-    })
-    .start();
+var tweens_in = [];
+var tweens_out = [];
+lines_points.forEach((line, i) => {
+  tweens_in.push(
+    new TWEEN.Tween(JSON.parse(JSON.stringify(line.start_f)))
+      .delay(1500)
+      .to(JSON.parse(JSON.stringify(line.end_f)), 1500)
+      .easing(TWEEN.Easing.Sinusoidal.InOut)
+      .onUpdate(function (obj) {
+        line.points.forEach((p) => {
+          scene.children[p].material.color.copy(obj);
+          scene.children[p].scale.copy(obj);
+        });
+      })
+      .onStart(() => {
+        parent.postMessage((i + 1) * 2, "*");
+        setTimeout(() => {
+          parent.postMessage((i + 1) * 2 + 1, "*");
+        }, 1500);
+      })
+  );
 
-  pos_to_ind();
-}
+  tweens_out.unshift(
+    new TWEEN.Tween(JSON.parse(JSON.stringify(line.end_f)))
+      .delay(1000)
+      .to(JSON.parse(JSON.stringify(line.start_f)), 1000)
+      .easing(TWEEN.Easing.Sinusoidal.InOut)
+      .onUpdate(function (obj) {
+        line.points.forEach((p) => {
+          scene.children[p].material.color.copy(obj);
+          scene.children[p].scale.copy(obj);
+        });
+      })
+  );
+});
+
+for (var i = 0; i < tweens_in.length - 1; i++)
+  tweens_in[i].chain(tweens_in[i + 1]);
+
+tweens_in[tweens_in.length - 1].onComplete(() => {
+  parent.postMessage(0, "*");
+  tweens_out.forEach((t) => {
+    t.start();
+  });
+
+  setTimeout(() => {
+    parent.postMessage(1, "*");
+  }, 1500);
+  setTimeout(() => {
+    tweens_in[0].start();
+  }, 1500);
+});
 
 ////////////////////////////////////////////////////// \Setup Animations
 
 ////////////////////////////////////////////////////////
 
 parent.postMessage(0, "*");
-setTimeout(point_spawner, 1000);
+setTimeout(() => {
+  parent.postMessage(1, "*");
+  tweens_in[0].start();
+}, 1500);
 animate();
 
 ////////////////////////////////////////////////////////
