@@ -76,8 +76,6 @@ async function load_backgrounds() {
 }
 
 function on_back_change(type) {
-  console.log(type);
-  console.log(backgrounds[type]);
   if (backgrounds[type].text == null) {
     if (backgrounds[type].url == null)
       scene.background = backgrounds[type].text;
@@ -226,6 +224,7 @@ function init_socket(event) {
 
 function on_prog_receive(event) {
   const buf_view = new Uint8Array(event.data);
+  const points_list = [];
 
   for (let z = 0; z < grid_size.z; z++)
     for (let y = 0; y < grid_size.y; y++)
@@ -239,7 +238,9 @@ function on_prog_receive(event) {
             buf_view[ind3 + 2]
           )
         );
+        if (buf_view[ind3] == 255) points_list.push(ind);
       }
+  console.log(JSON.stringify(points_list));
 }
 
 function on_prog_close(event) {
