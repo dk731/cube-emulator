@@ -238,7 +238,17 @@ function on_prog_receive(event) {
             buf_view[ind3 + 2]
           )
         );
-        if (buf_view[ind3] == 255) points_list.push(ind);
+        if (
+          buf_view[ind3] != 0 ||
+          buf_view[ind3 + 1] != 0 ||
+          buf_view[ind3 + 2] != 0
+        )
+          // points_list.push([
+          //   buf_view[ind3],
+          //   buf_view[ind3 + 1],
+          //   buf_view[ind3 + 2],
+          // ]);
+          points_list.push(ind);
       }
   console.log(JSON.stringify(points_list));
 }

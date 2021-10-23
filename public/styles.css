@@ -4,9 +4,13 @@ body {
 canvas {
   width: 100vw;
   height: 100vh;
+  position: absolute;
+  left: 0px;
+  top: 0px;
 }
 
 .btn-group {
   left: 100%;
   transform: translate(-100%);
+  z-index: 1;
 }
