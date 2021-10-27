@@ -171,6 +171,40 @@ loader.load(
   }
 );
 
+var f1 = new THREE.Mesh(
+  new THREE.SphereGeometry(grid_dist / 2, 32, 16),
+  new THREE.MeshBasicMaterial({
+    color: 0xffff00,
+    opacity: 0.3,
+    transparent: true,
+  })
+);
+var f2 = new THREE.Mesh(
+  new THREE.SphereGeometry(grid_dist / 2, 32, 16),
+  new THREE.MeshBasicMaterial({
+    color: 0xffff00,
+    opacity: 0.3,
+    transparent: true,
+  })
+);
+
+f1.position.copy(new THREE.Vector3().copy(start_point));
+f2.position.copy(
+  new THREE.Vector3()
+    .copy(start_point)
+    .add({ x: grid_dist * 3.21, y: -grid_dist * 5.11, z: -grid_dist * 6.31 })
+);
+
+scene.add(f1);
+
+scene.add(f2);
+
+scene.children[0].material.color.copy({ r: 1.0, g: 1.0, b: 1.0 });
+scene.children[1619].material.color.copy({ r: 1.0, g: 1.0, b: 1.0 });
+
+scene.children[0].scale.copy({ x: 2.0, y: 2.0, z: 2.0 });
+scene.children[1619].scale.copy({ x: 2.0, y: 2.0, z: 2.0 });
+
 //////////////////////////////////////////////////////// \Setup arrow objects
 
 animate();
