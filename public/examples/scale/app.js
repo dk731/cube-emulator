@@ -166,8 +166,10 @@ function anim_pixels(pix_list, start_col_s, end_col_s, anim_time, delay, msg) {
         scene.children[p].scale.copy(obj);
       });
     })
+    .onStart(() => {
+      parent.postMessage(msg, "*");
+    })
     .start();
-  if (msg) parent.postMessage(msg, "*");
 }
 
 function anim_translate(start_pos, end_pos, anim_time, delay, msg) {
@@ -180,8 +182,10 @@ function anim_translate(start_pos, end_pos, anim_time, delay, msg) {
       origin_obj.arrow_y.position.copy(obj);
       origin_obj.arrow_z.position.copy(obj);
     })
+    .onStart(() => {
+      parent.postMessage(msg, "*");
+    })
     .start();
-  if (msg) parent.postMessage(msg, "*");
 }
 
 function anim_scale(start_scale, end_scale, anim_time, delay, msg) {
@@ -201,8 +205,10 @@ function anim_scale(start_scale, end_scale, anim_time, delay, msg) {
       if (obj.z < -0.1) origin_obj.arrow_z.setDirection({ x: 0, y: 0, z: 1 });
       else origin_obj.arrow_z.setDirection({ x: 0, y: 0, z: -1 });
     })
+    .onStart(() => {
+      parent.postMessage(msg, "*");
+    })
     .start();
-  if (msg) parent.postMessage(msg, "*");
 }
 
 scene.add(origin_obj.arrow_x);
@@ -260,27 +266,43 @@ function render() {
 // Code animation names:
 // clear
 // trans1
+// setc1
 // sphere1
 // scale1
+// setc2
 // sphere2
 // pop1
 // trans2
+// setc3
 // trinagle1
 // scale2
 // triangle2
 // pop2
+const anim_time = 1500;
+const delay_time = 500;
 function animation_flow() {
   parent.postMessage("clear", "*");
-  (async () => await new Promise((resolve) => setTimeout(resolve, 500)))();
+  (async () =>
+    await new Promise((resolve) => setTimeout(resolve, anim_time)))();
 
-  anim_translate(origin_pos, offset_1, 2000, 1000, "trans1");
+  anim_translate(
+    origin_pos,
+    offset_1,
+    anim_time,
+    (anim_time + delay_time) * 1,
+    "trans1"
+  );
+
+  setTimeout(() => {
+    parent.postMessage("setc1", "*");
+  }, (anim_time + delay_time) * 2);
 
   anim_pixels(
     sphere1_points,
     defualt_pix,
     { r: 1.0, g: 0.721, b: 0.819, x: 3, y: 3, z: 3 },
-    2000,
-    4000,
+    anim_time,
+    (anim_time + delay_time) * 3,
     "sphere1"
   );
 
@@ -291,17 +313,21 @@ function animation_flow() {
       y: def_arrow_size,
       z: def_arrow_size,
     },
-    2000,
-    7000,
+    anim_time,
+    (anim_time + delay_time) * 4,
     "scale1"
   );
+
+  setTimeout(() => {
+    parent.postMessage("setc2", "*");
+  }, (anim_time + delay_time) * 5);
 
   anim_pixels(
     sphere2_points,
     defualt_pix,
     { r: 0.807, g: 0.968, b: 0.627, x: 3, y: 3, z: 3 },
-    2000,
-    10000,
+    anim_time,
+    (anim_time + delay_time) * 6,
     "sphere2"
   );
 
@@ -312,21 +338,31 @@ function animation_flow() {
       z: def_arrow_size,
     },
     def_arrow_size_vec,
-    2000,
-    13000,
+    anim_time,
+    (anim_time + delay_time) * 7,
     "pop1"
   );
 
-  anim_translate(offset_1, origin_pos, 2000, 13000);
+  anim_translate(offset_1, origin_pos, anim_time, (anim_time + delay_time) * 7);
 
-  anim_translate(origin_pos, offset_2, 2000, 16000, "trans2");
+  anim_translate(
+    origin_pos,
+    offset_2,
+    anim_time,
+    (anim_time + delay_time) * 8,
+    "trans2"
+  );
+
+  setTimeout(() => {
+    parent.postMessage("setc3", "*");
+  }, (anim_time + delay_time) * 9);
 
   anim_pixels(
     triangle1_points,
     defualt_pix,
     { r: 0.439, g: 0.839, b: 1.0, x: 3, y: 3, z: 3 },
-    2000,
-    19000,
+    anim_time,
+    (anim_time + delay_time) * 10,
     "triangle1"
   );
 
@@ -337,8 +373,8 @@ function animation_flow() {
       y: -def_arrow_size,
       z: -def_arrow_size,
     },
-    2000,
-    22000,
+    anim_time,
+    (anim_time + delay_time) * 11,
     "scale2"
   );
 
@@ -346,14 +382,20 @@ function animation_flow() {
     triangle2_points,
     defualt_pix,
     { r: 0.439, g: 0.839, b: 1.0, x: 3, y: 3, z: 3 },
-    2000,
-    25000,
+    anim_time,
+    (anim_time + delay_time) * 12,
     "triangle2"
   );
 
   ////////////////////////////////////////
 
-  anim_translate(offset_2, origin_pos, 2000, 28000);
+  anim_translate(
+    offset_2,
+    origin_pos,
+    anim_time,
+    (anim_time + delay_time) * 13,
+    null
+  );
 
   anim_scale(
     {
@@ -362,8 +404,8 @@ function animation_flow() {
       z: -def_arrow_size,
     },
     def_arrow_size_vec,
-    2000,
-    28000,
+    anim_time,
+    (anim_time + delay_time) * 13,
     "pop2"
   );
 
@@ -371,34 +413,37 @@ function animation_flow() {
     sphere1_points,
     { r: 1.0, g: 0.721, b: 0.819, x: 3, y: 3, z: 3 },
     defualt_pix,
-    2000,
-    31000
+    anim_time,
+    (anim_time + delay_time) * 14,
+    "clear"
   );
 
   anim_pixels(
     sphere2_points,
     { r: 0.807, g: 0.968, b: 0.627, x: 3, y: 3, z: 3 },
     defualt_pix,
-    2000,
-    31000,
-    "clear"
+    anim_time,
+    (anim_time + delay_time) * 14,
+    null
   );
 
   anim_pixels(
     triangle1_points,
     { r: 0.439, g: 0.839, b: 1.0, x: 3, y: 3, z: 3 },
     defualt_pix,
-    2000,
-    31000
+    anim_time,
+    (anim_time + delay_time) * 14,
+    null
   );
 
   anim_pixels(
     triangle2_points,
     { r: 0.439, g: 0.839, b: 1.0, x: 3, y: 3, z: 3 },
     defualt_pix,
-    2000,
-    31000
+    anim_time,
+    (anim_time + delay_time) * 14,
+    null
   );
 
-  setTimeout(animation_flow, 31000);
+  setTimeout(animation_flow, (anim_time + delay_time) * 15);
 }
