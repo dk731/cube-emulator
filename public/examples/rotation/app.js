@@ -333,7 +333,7 @@ function animation_flow() {
   );
 
   setTimeout(() => {
-    parent.postMessage("setc1", "*");
+    parent.postMessage("col1", "*");
   }, (anim_time + delay_time) * 6);
 
   anim_pixels(
@@ -342,7 +342,7 @@ function animation_flow() {
     { r: 0.663, g: 0.984, b: 0.843, x: 3, y: 3, z: 3 },
     anim_time,
     (anim_time + delay_time) * 7,
-    "triangle1"
+    "poly1"
   );
 
   anim_rotate(
@@ -359,7 +359,7 @@ function animation_flow() {
     { r: 0.663, g: 0.984, b: 0.843, x: 3, y: 3, z: 3 },
     anim_time,
     (anim_time + delay_time) * 9,
-    "triangle2"
+    "poly2"
   );
 
   anim_translate(
@@ -387,7 +387,7 @@ function animation_flow() {
   );
 
   setTimeout(() => {
-    parent.postMessage("setc2", "*");
+    parent.postMessage("col2", "*");
   }, (anim_time + delay_time) * 12);
 
   anim_pixels(
@@ -425,7 +425,7 @@ function animation_flow() {
   );
 
   setTimeout(() => {
-    parent.postMessage("setc2", "*");
+    parent.postMessage("col3", "*");
   }, (anim_time + delay_time) * 17);
 
   anim_pixels(
