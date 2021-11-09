@@ -8,12 +8,7 @@ import { EXRLoader } from "https://cdn.skypack.dev/three@v0.130.1-bsY6rEPcA1ZYyZ
 
 const exr_loader = new EXRLoader();
 var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera(
-  75,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000
-);
+var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 var renderer = new THREE.WebGLRenderer({ antialias: true });
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enablePan = false;
@@ -26,7 +21,6 @@ controls.update();
 
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
-renderer.toneMapping = THREE.ReinhardToneMapping;
 document.body.appendChild(renderer.domElement);
 
 const stats = Stats();
@@ -69,16 +63,14 @@ function load_image(type) {
 
 async function load_backgrounds() {
   var promise_list = [];
-  for (var type in backgrounds)
-    if (backgrounds[type].url) promise_list.push(load_image(type));
+  for (var type in backgrounds) if (backgrounds[type].url) promise_list.push(load_image(type));
 
   Promise.all(promise_list);
 }
 
 function on_back_change(type) {
   if (backgrounds[type].text == null) {
-    if (backgrounds[type].url == null)
-      scene.background = backgrounds[type].text;
+    if (backgrounds[type].url == null) scene.background = backgrounds[type].text;
   } else scene.background = backgrounds[type].text;
   cur_text = type;
 }
@@ -107,7 +99,7 @@ const table_geometry = new THREE.BoxGeometry(
 );
 
 const table_material = new THREE.MeshBasicMaterial({
-  color: new THREE.Color(0x994c00),
+  color: new THREE.Color(0x502000),
 });
 const bloomLayer = new THREE.Layers();
 bloomLayer.set(BLOOM_SCENE);
@@ -124,12 +116,7 @@ const materials = {};
 
 const renderScene = new RenderPass(scene, camera);
 
-const bloomPass = new UnrealBloomPass(
-  new THREE.Vector2(window.innerWidth, window.innerHeight),
-  1.5,
-  0.4,
-  0.85
-);
+const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
 bloomPass.threshold = bloom_params.bloomThreshold;
 bloomPass.strength = bloom_params.bloomStrength;
 bloomPass.radius = bloom_params.bloomRadius;
@@ -171,10 +158,7 @@ var idle_anim = {
 // Setup colors array of grid size
 var colors_array = Array.from({ length: grid_size.x }, () =>
   Array.from({ length: grid_size.y }, () =>
-    Array.from(
-      { length: grid_size.z },
-      () => new THREE.Color(idle_anim.default_color)
-    )
+    Array.from({ length: grid_size.z }, () => new THREE.Color(idle_anim.default_color))
   )
 );
 
@@ -188,15 +172,11 @@ function idle_animation() {
   ];
 
   idle_anim.points_list.push(tmp_point);
-  colors_array[tmp_point[0]][tmp_point[1]][tmp_point[2]] = new THREE.Color(
-    0xffffff * Math.random()
-  );
+  colors_array[tmp_point[0]][tmp_point[1]][tmp_point[2]] = new THREE.Color(0xffffff * Math.random());
 
   if (idle_anim.points_list.length > idle_anim.max_point) {
     const tmp = idle_anim.points_list.shift();
-    colors_array[tmp[0]][tmp[1]][tmp[2]] = new THREE.Color(
-      idle_anim.default_color
-    );
+    colors_array[tmp[0]][tmp[1]][tmp[2]] = new THREE.Color(idle_anim.default_color);
   }
 }
 
@@ -225,32 +205,26 @@ function init_socket(event) {
 function on_prog_receive(event) {
   const buf_view = new Uint8Array(event.data);
   const points_list = [];
-
+  console.log(buf_view[1] / 255.0, buf_view[0] / 255.0, buf_view[2] / 255.0);
   for (let z = 0; z < grid_size.z; z++)
     for (let y = 0; y < grid_size.y; y++)
       for (let x = 0; x < grid_size.x; x++) {
         const ind = x + (255 - (y + z * grid_size.y)) * grid_size.x;
         const ind3 = ind * 3;
-        scene.children[ind].material.color.copy(
-          new THREE.Color(
-            buf_view[ind3 + 1],
-            buf_view[ind3],
-            buf_view[ind3 + 2]
-          )
+        scene.children[ind].material.color.setRGB(
+          buf_view[ind3 + 1] / 255.0,
+          buf_view[ind3] / 255.0,
+          buf_view[ind3 + 2] / 255.0
         );
-        if (
-          buf_view[ind3] != 0 ||
-          buf_view[ind3 + 1] != 0 ||
-          buf_view[ind3 + 2] != 0
-        )
-          // points_list.push([
-          //   buf_view[ind3],
-          //   buf_view[ind3 + 1],
-          //   buf_view[ind3 + 2],
-          // ]);
-          points_list.push(ind);
+        // if (buf_view[ind3] != 0 || buf_view[ind3 + 1] != 0 || buf_view[ind3 + 2] != 0)
+        // points_list.push([
+        //   buf_view[ind3],
+        //   buf_view[ind3 + 1],
+        //   buf_view[ind3 + 2],
+        // ]);
+        // points_list.push(ind);
       }
-  console.log(JSON.stringify(points_list));
+  // console.log(JSON.stringify(points_list));
 }
 
 function on_prog_close(event) {
@@ -259,10 +233,7 @@ function on_prog_close(event) {
   if (ws_connected) {
     colors_array = Array.from({ length: grid_size.x }, () =>
       Array.from({ length: grid_size.y }, () =>
-        Array.from(
-          { length: grid_size.z },
-          () => new THREE.Color(idle_anim.default_color)
-        )
+        Array.from({ length: grid_size.z }, () => new THREE.Color(idle_anim.default_color))
       )
     );
     idle_anim.points_list = [];
@@ -304,11 +275,7 @@ function setup_grid_mesh() {
           sphere_geometry,
           new THREE.MeshBasicMaterial({ color: new THREE.Color(0x0f0f0f) })
         );
-        sphere.position.copy(
-          new THREE.Vector3(x, -y, -z)
-            .multiplyScalar(grid_dist)
-            .add(start_point)
-        );
+        sphere.position.copy(new THREE.Vector3(x, -y, -z).multiplyScalar(grid_dist).add(start_point));
         sphere.layers.enable(BLOOM_SCENE);
         scene.add(sphere);
       }
@@ -316,9 +283,7 @@ function setup_grid_mesh() {
   }
 
   const table = new THREE.Mesh(table_geometry, table_material);
-  table.position.copy(
-    new THREE.Vector3(0, -start_point.y - grid_dist * 1.5, 0)
-  );
+  table.position.copy(new THREE.Vector3(0, -start_point.y - grid_dist * 1.5, 0));
   table.layers.disable(BLOOM_SCENE);
   scene.add(table);
 }
@@ -339,9 +304,7 @@ function update_colors() {
     for (let z = 0; z < grid_size.z; z++)
       for (let y = 0; y < grid_size.y; y++)
         for (let x = 0; x < grid_size.x; x++)
-          scene.children[
-            x + (y + z * grid_size.y) * grid_size.x
-          ].material.color.copy(colors_array[x][y][z]);
+          scene.children[x + (y + z * grid_size.y) * grid_size.x].material.color.copy(colors_array[x][y][z]);
 }
 
 function darkenNonBloomed(obj) {
