@@ -9,8 +9,14 @@ canvas {
   top: 0px;
 }
 
-.btn-group {
+.actions-cont {
+  position: absolute;
+  margin-top: 5px;
   left: 100%;
   transform: translate(-100%);
-  z-index: 1;
+  z-index: 1000;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  row-gap: 5px;
 }

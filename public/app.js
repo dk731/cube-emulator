@@ -15,7 +15,7 @@ bloomLayer.set(BLOOM_SCENE);
 
 const params = {
   exposure: 1,
-  bloomStrength: 4,
+  bloomStrength: 3,
   bloomThreshold: 0.05,
   bloomRadius: 0,
 };
