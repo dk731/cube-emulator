@@ -8,7 +8,6 @@
       integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
       crossorigin="anonymous"
     />
-    <script src="https://unpkg.com/three@0.127.0/examples/js/libs/stats.min.js"></script>
     <script type="x-shader/x-vertex" id="vertexshader">
       varying vec2 vUv;
 
@@ -29,44 +28,21 @@
 
       void main() {
 
-      	gl_FragColor = ( texture2D( baseTexture, vUv ) + vec4( 1.0 ) * texture2D( bloomTexture, vUv ) );
+      	gl_FragColor =  ( texture2D( baseTexture, vUv ) + vec4( 1.0 ) * texture2D( bloomTexture, vUv ) );
 
       }
     </script>
   </head>
 
   <body>
-    <div
-      class="btn-group"
-      role="group"
-      aria-label="Basic radio toggle button group"
-    >
-      <input
-        type="radio"
-        class="btn-check"
-        name="btnradio"
-        id="btnradio1"
-        autocomplete="off"
-        checked
-      />
+    <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+      <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked />
       <label class="btn btn-outline-primary" for="btnradio1">None</label>
 
-      <input
-        type="radio"
-        class="btn-check"
-        name="btnradio"
-        id="btnradio2"
-        autocomplete="off"
-      />
+      <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off" />
       <label class="btn btn-outline-primary" for="btnradio2">Outdoors</label>
 
-      <input
-        type="radio"
-        class="btn-check"
-        name="btnradio"
-        id="btnradio3"
-        autocomplete="off"
-      />
+      <input type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off" />
       <label class="btn btn-outline-primary" for="btnradio3">Indoors</label>
     </div>
     <script type="module" src="./app.js" id="CubeDrawer"></script>
