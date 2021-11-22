@@ -196,7 +196,7 @@ var socket;
 var ws_connected = false;
 function wait_prog_routine() {
   try {
-    socket = new WebSocket("ws://localhost:8080");
+    socket = new WebSocket("ws://localhost:12035");
 
     socket.onopen = init_socket;
     socket.binaryType = "arraybuffer";
@@ -214,7 +214,6 @@ function init_socket(event) {
 
 function on_prog_receive(event) {
   const buf_view = new Uint8Array(event.data);
-
   for (let z = 0; z < grid_size.z; z++)
     for (let y = 0; y < grid_size.y; y++)
       for (let x = 0; x < grid_size.x; x++) {
