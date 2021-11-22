@@ -3,12 +3,7 @@ import { OrbitControls } from "https://cdn.skypack.dev/three@v0.130.1-bsY6rEPcA1
 
 ////////////////////////////////////////////////////// Init WebGL Scene and Camera objects
 var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera(
-  75,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000
-);
+var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
 var renderer = new THREE.WebGLRenderer({ antialias: true });
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -48,11 +43,7 @@ const start_point = new THREE.Vector3()
   .multiply(new THREE.Vector3(-1, 1, 1));
 
 const sphere_geometry = new THREE.SphereGeometry(sphere_r, 10, 10);
-const table_geometry = new THREE.BoxGeometry(
-  grid_size.x * grid_dist * 1.1,
-  grid_dist / 2,
-  grid_size.y * grid_dist * 1.1
-);
+const table_geometry = new THREE.BoxGeometry(grid_size.x * grid_dist * 1.1, grid_dist / 2, grid_size.y * grid_dist * 1.1);
 
 const table_material = new THREE.MeshBasicMaterial({
   color: new THREE.Color(0x854c00),
@@ -146,24 +137,12 @@ loader.load(
       })
     );
     x.scale.copy({ x: 0.06, y: 0.06, z: 0.06 });
-    x.position.copy(
-      new THREE.Vector3()
-        .copy(start_point)
-        .add({ x: (grid_size.x * grid_dist) / 2.5, y: 3, z: 2 })
-    );
+    x.position.copy(new THREE.Vector3().copy(start_point).add({ x: (grid_size.x * grid_dist) / 2.5, y: 3, z: 2 }));
     y.scale.copy({ x: 0.06, y: 0.06, z: 0.06 });
-    y.position.copy(
-      new THREE.Vector3()
-        .copy(start_point)
-        .add({ x: -4, y: -(grid_size.x * grid_dist) / 2, z: 1 })
-    );
+    y.position.copy(new THREE.Vector3().copy(start_point).add({ x: -4, y: -(grid_size.x * grid_dist) / 2, z: 1 }));
     y.rotateY(-Math.PI / 4);
     z.scale.copy({ x: 0.06, y: 0.06, z: 0.06 });
-    z.position.copy(
-      new THREE.Vector3()
-        .copy(start_point)
-        .add({ x: -2, y: 3, z: -(grid_size.x * grid_dist) / 2.5 })
-    );
+    z.position.copy(new THREE.Vector3().copy(start_point).add({ x: -2, y: 3, z: -(grid_size.x * grid_dist) / 2.5 }));
     z.rotateY(-Math.PI / 2);
     scene.add(x);
     scene.add(y);
@@ -187,23 +166,30 @@ var f2 = new THREE.Mesh(
     transparent: true,
   })
 );
+var f3 = new THREE.Mesh(
+  new THREE.SphereGeometry(grid_dist / 2, 32, 16),
+  new THREE.MeshBasicMaterial({
+    color: 0xffff00,
+    opacity: 0.3,
+    transparent: true,
+  })
+);
 
 f1.position.copy(new THREE.Vector3().copy(start_point));
 f2.position.copy(
-  new THREE.Vector3()
-    .copy(start_point)
-    .add({ x: grid_dist * 3.21, y: -grid_dist * 5.11, z: -grid_dist * 6.31 })
+  new THREE.Vector3().copy(start_point).add({ x: grid_dist * 3.21, y: -grid_dist * 5.11, z: -grid_dist * 6.31 })
 );
+f3.position.copy(new THREE.Vector3().copy(start_point).add({ x: grid_dist * 2.1, y: -grid_dist * 12.5, z: -grid_dist * 1.6 }));
 
 scene.add(f1);
-
 scene.add(f2);
+scene.add(f3);
 
 scene.children[0].material.color.copy({ r: 1.0, g: 1.0, b: 1.0 });
 scene.children[1619].material.color.copy({ r: 1.0, g: 1.0, b: 1.0 });
 
-scene.children[0].scale.copy({ x: 2.0, y: 2.0, z: 2.0 });
-scene.children[1619].scale.copy({ x: 2.0, y: 2.0, z: 2.0 });
+scene.children[0].scale.copy({ x: 3.0, y: 3.0, z: 3.0 });
+scene.children[1619].scale.copy({ x: 3.0, y: 3.0, z: 3.0 });
 
 //////////////////////////////////////////////////////// \Setup arrow objects
 
@@ -228,11 +214,7 @@ function setup_grid_mesh() {
             color: new THREE.Color(start_color, start_color, start_color),
           })
         );
-        sphere.position.copy(
-          new THREE.Vector3(x, -y, -z)
-            .multiplyScalar(grid_dist)
-            .add(start_point)
-        );
+        sphere.position.copy(new THREE.Vector3(x, -y, -z).multiplyScalar(grid_dist).add(start_point));
         scene.add(sphere);
       }
     }
